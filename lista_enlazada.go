@@ -1,26 +1,25 @@
 package lista
+
 const (
 	LISTA_VACIA = 0
 )
 
 type nodo[T any] struct {
-	dato T
+	dato    T
 	proximo *nodo[T]
 }
 type listaEnlazada[T any] struct {
 	primero *nodo[T]
-	ultimo *nodo[T]
-	largo int 
+	ultimo  *nodo[T]
+	largo   int
 }
 
-
-// Iterador externi
+// Iterador externo
 type iteradorLista[T any] struct {
-	actual *nodo[T]
+	actual   *nodo[T]
 	anterior *nodo[T]
-	lista *listaEnlazada[T]
+	lista    *listaEnlazada[T]
 }
-
 
 func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{primero: nil, ultimo: nil, largo: 0}
@@ -34,7 +33,7 @@ func (lista *listaEnlazada[T]) EstaVacia() bool {
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
-	nuevoNodo := crearNodo(dato, lista.primero)
+	nuevoNodo := crearNodo(dato, lista.primero) //Crea el primer nodo, este apuntara a nil si no hay elementos cargados.
 	lista.primero = nuevoNodo
 	if lista.ultimo == nil {
 		lista.ultimo = nuevoNodo
@@ -43,13 +42,13 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 }
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
-	nuevoNodo := crearNodo(dato, nil)
+	nuevoNodo := crearNodo(dato, nil) //El nodo apuntara a nil porque sera el ultimo y no tiene a quien apuntar.
 	if lista.ultimo != nil {
 		lista.ultimo.proximo = nuevoNodo
 	}
 
 	lista.ultimo = nuevoNodo
-	
+
 	if lista.primero == nil {
 		lista.primero = nuevoNodo
 	}
@@ -61,9 +60,9 @@ func (lista *listaEnlazada[T]) BorrarPrimero() T {
 		panic("La lista esta vacia")
 	}
 	dato := lista.primero.dato
-	lista.primero = lista.primero.proximo
-	lista.largo--
-	
+	lista.primero = lista.primero.proximo //Cambia la referencia, ahora primero apunta a lo que era el segundo.
+	lista.largo--                         //Recortar la lista.
+
 	if lista.primero == nil { // si la lista quedo vacia
 		lista.ultimo = nil
 	}
@@ -90,23 +89,23 @@ func (lista *listaEnlazada[T]) Largo() int {
 }
 
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
-	actual := lista.primero
+	actual := lista.primero //Comienza a iterar desde el comienzo.
 	for actual != nil {
-		if !visitar(actual.dato) {
+		if !visitar(actual.dato) { //Si la funcion no devuelve true, no se itera mas.
 			break
 		}
-		actual = actual.proximo	
+		actual = actual.proximo //Pasa al siguiente nodo.
 	}
 }
 
-// ITERADOR EXTERNO 
+// ITERADOR EXTERNO
 
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
-	return &iteradorLista[T]{ actual: lista.primero, anterior: nil, lista: lista}
+	return &iteradorLista[T]{actual: lista.primero, anterior: nil, lista: lista}
 }
 
 // PRIMITIVAS DEL ITERADOR EXTERNO
-	
+
 func (iterado *iteradorLista[T]) VerActual() T {
 	if iterado.actual == nil {
 		panic("El iterador termino de iterar")
@@ -129,7 +128,7 @@ func (iterado *iteradorLista[T]) Siguiente() T {
 
 func (iterado *iteradorLista[T]) Insertar(dato T) {
 	nuevoNodo := crearNodo(dato, iterado.actual)
-	
+
 	if iterado.anterior == nil {
 		iterado.lista.primero = nuevoNodo
 		if iterado.lista.ultimo == nil {
@@ -151,7 +150,7 @@ func (iterado *iteradorLista[T]) Borrar() T {
 		panic("El iterador termino de iterar")
 	}
 	dato := iterado.actual.dato
-	
+
 	if iterado.anterior == nil { // Borramos el primer nodo
 		iterado.lista.primero = iterado.actual.proximo
 		if iterado.lista.primero == nil { // Si la lista quedo vacia
